@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="blog.store.mapper.AuthorMapper">
+
+  <resultMap type="Author" id="authorMap">
+  	<id column="author_id" property="id"/>
+  	<result column="author_password" property="password"/>
+  	<result column="author_name" property="name"/>
+  </resultMap>
+  
+  <sql id="selectAuthor">
+  	SELECT author_id, author_password, author_name, email
+  	FROM author_tb
+  </sql>
+  
+  <select id="findAuthor" parameterType="string" resultMap="authorMap">
+  	<include refid="selectAuthor"/>
+  	WHERE author_id = #{id}
+  </select>
+  
+  <select id="findAuthorsByName" parameterType="string" resultMap="authorMap">
+  	<include refid="selectAuthor"/>
+  	WHERE author_name = #{name}
+  	
+  </select>
+  
+  <select id="findAllAuthors" resultMap="authorMap">
+  	<include refid="selectAuthor"/>
+  	ORDER BY author_id DESC
+  </select>
+  
+  <insert id="registAuthor" parameterType="Author">
+  	INSERT INTO author_tb (author_id, author_password, author_name, email)
+  	VALUES (#{id}, #{password}, #{name}, #{email})
+  </insert>
+  
+  <update id="updateAuthor" parameterType="Author">
+  	UPDATE author_tb
+  	SET author_password = #{password}, author_name = #{name}, email = #{email}
+  	WHERE author_id = #{id}
+  </update>
+  
+  <delete id="deleteAuthor" parameterType="string">
+  	DELETE FROM author_tb
+  	WHERE author_id = #{id}
+  </delete>
+  
+  <select id="findAuthorsByIds" resultMap="authorMap">
+  	<include refid="selectAuthor"/>
+  	WHERE author_id IN
+  	<foreach collection="list" item="id" separator="," open="(" close=")">
+  		#{id}
+  	</foreach>
+  </select>
+  
+  <select id="findAuthorByCondition" parameterType="hashmap" resultType="Author">
+  	<include refid="selectAuthor"/>
+  	<if test="id != null">
+  		WHERE author_id = #{id}
+  	</if>
+  </select>
+  	
+</mapper>

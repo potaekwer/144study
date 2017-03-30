@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="blog.store.mapper.PostMapper">
+
+	<resultMap type="Post" id="postMap">
+		<id property="id" column="id"/>
+		<result property="subject" column="subject"/>
+		<result property="contents" column="contents"/>
+		<association property="author" column="author_id"
+			select="blog.store.mapper.AuthorMapper.findAuthor"
+			jdbcType="VARCHAR" javaType="Author"/>
+		<association property="blog" column="blog_id"
+			select="blog.store.mapper.BlogMapper.findBlog"
+			jdbcType="VARCHAR" javaType="Blog"/>
+	</resultMap>
+	
+
+	<sql id="selectPost">
+		SELECT id, subject, contents, author_id, blog_id
+		FROM post_tb
+	</sql>
+	
+	<select id="findPost" parameterType="int" resultMap="postMap">
+		<include refid="selectPost"/>
+		WHERE id = #{id}
+	</select>
+	
+	<select id="findAllPost" resultMap="postMap">
+		<include refid="selectPost"/>
+	</select>
+	
+	<select id="findPostsByAuthorName" parameterType="map" resultMap="postMap">
+		<include refid="selectPost"/>
+		WHERE author_id = (SELECT author_id FROM author_tb WHERE author_name LIKE '%${name}%')
+	</select>
+	
+	<select id="findPostsByBlogTitle" parameterType="map" resultMap="postMap">
+		<include refid="selectPost"/>
+		WHERE blog_id = (SELECT blog_id FROM blog_tb WHERE title LIKE '%${title}%')
+	</select>
+	
+	<select id="findPostsBySubject" parameterType="map" resultMap="postMap">
+		<include refid="selectPost"/>
+		WHERE subject LIKE '%${subject}%'
+	</select>
+	
+	<select id="findPostsByContents" parameterType="map" resultMap="postMap">
+		<include refid="selectPost"/>
+		WHERE contents LIKE '%${contents}%'
+	</select>
+	
+	<insert id="registPost" parameterType="Post" useGeneratedKeys="true">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			SELECT post_seq.nextval FROM dual
+		</selectKey>	
+		INSERT INTO post_tb
+		VALUES (#{id}, #{subject}, #{contents}, #{author.id}, #{blog.id})
+	</insert>
+	
+	
+
+  
+  	
+</mapper>
